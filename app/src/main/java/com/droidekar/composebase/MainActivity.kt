@@ -4,7 +4,11 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -22,7 +26,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.droidekar.composebase.ui.theme.ComposeBaseTheme
+import java.sql.Time
+import java.text.SimpleDateFormat
+import java.util.*
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -61,18 +69,43 @@ fun topBar() {
 @Composable
 fun Greeting(name: String) {
 
-    Text(text = "Hello $name!",
-        modifier = Modifier
-            .padding(14.dp)
-    )
+    var isSelected by remember {
+        mutableStateOf(false)
+    }
+    var targetColor: Color = if (isSelected) Color.Yellow else Color.Transparent
+    Surface(color = targetColor) {
+        Text(text = "Hello $name!",
+            modifier = Modifier
+                .clickable {
+                    isSelected = !isSelected
+                }
+                .padding(14.dp)
+        )
+    }
 }
 
 @Composable
 fun MessageCard(msg: String) {
+    var isSelected by remember {
+        mutableStateOf(false)
+    }
+
+    val color: Color by animateColorAsState(
+        targetValue = if (isSelected) MaterialTheme.colors.primary else Color.Transparent,
+        animationSpec = tween(durationMillis = 1000)
+    )
+
     // Add padding around our message
-    Row(modifier = Modifier.padding(all = 8.dp)) {
+    Row(modifier = Modifier
+        .fillMaxWidth()
+        .clickable {
+            isSelected = !isSelected
+        }
+        .background(color)
+        .padding(all = 8.dp)) {
+
         Image(
-            painter = painterResource(R.drawable.baseline_access_alarm_24),
+            painter = painterResource(R.drawable.cmc),
             contentDescription = "Contact profile picture",
             modifier = Modifier
                 // Set image size to 40 dp
@@ -85,7 +118,10 @@ fun MessageCard(msg: String) {
         Spacer(modifier = Modifier.width(8.dp))
 
         Column {
-            Text(text = "Aloha")
+            val sdf = SimpleDateFormat("MM/dd/yyyy HH:mm:ss z")
+            val currentDateAndTime = sdf.format(Date())
+
+            Text(text = currentDateAndTime)
             // Add a vertical space between the author and message texts
             Spacer(modifier = Modifier.height(4.dp))
             Text(text = msg)
